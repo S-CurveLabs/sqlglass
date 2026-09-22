@@ -1,0 +1,86 @@
+name: Release
+
+# Push a tag like v0.1.0 to publish that version to PyPI, then to the MCP Registry.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    # Only the public copy publishes. The private repo carries this file so the two trees
+    # stay identical, and a tag pushed there must not race the real release to PyPI.
+    if: github.repository == 'S-CurveLabs/sqlglass'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Check versions match the tag
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          init=$(python -c "import re;print(re.search(r'__version__ = \"(.+?)\"', open('src/sqlglass/__init__.py').read()).group(1))")
+          sj=$(python -c "import json;d=json.load(open('server.json'));print(d['version'])")
+          pk=$(python -c "import json;d=json.load(open('server.json'));print(d['packages'][0]['version'])")
+          echo "tag=$tag __init__=$init server.json=$sj package=$pk"
+          [ "$tag" = "$init" ] && [ "$tag" = "$sj" ] && [ "$tag" = "$pk" ]
+      - run: sudo apt-get update && sudo apt-get install -y unixodbc
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install build twine
+      - run: python -m build
+      - run: twine check --strict dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/sqlglass/
+    permissions:
+      id-token: write # PyPI trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  mcp-registry:
+    needs: pypi
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # MCP Registry GitHub OIDC login
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+      - name: Wait for the PyPI release to be visible
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          for i in $(seq 1 30); do
+            curl -sf "https://pypi.org/pypi/sqlglass/$v/json" > /dev/null && exit 0
+            sleep 10
+          done
+          echo "sqlglass $v never appeared on PyPI" >&2; exit 1
+      - run: ./mcp-publisher validate
+      - run: ./mcp-publisher login github-oidc
+      - run: ./mcp-publisher publish

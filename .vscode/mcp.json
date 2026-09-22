@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "sqlglass": {
+      "type": "stdio",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "sqlglass"],
+      "env": {
+        "SQLGLASS_WORKSPACE": "${workspaceFolder}"
+      }
+    }
+  }
+}

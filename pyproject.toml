@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sqlglass"
+dynamic = ["version"]
+description = "MCP server for SQL Server / Azure SQL: schema-aware query building, lint, read-only execution, query plans and a git-tracked .sql query library"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "S-Curve Labs" }]
+keywords = ["mcp", "model-context-protocol", "sql-server", "azure-sql", "t-sql", "copilot", "sql-lint", "llm"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: SQL",
+    "Topic :: Database",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "mcp>=1.14",
+    "sqlglot>=25",
+    "pyodbc>=5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "build", "twine"]
+
+[project.urls]
+Homepage = "https://github.com/S-CurveLabs/sqlglass"
+Repository = "https://github.com/S-CurveLabs/sqlglass"
+Issues = "https://github.com/S-CurveLabs/sqlglass/issues"
+Changelog = "https://github.com/S-CurveLabs/sqlglass/blob/main/CHANGELOG.md"
+
+[project.scripts]
+sqlglass = "sqlglass.server:main"
+
+[tool.hatch.version]
+path = "src/sqlglass/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sqlglass"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/sqlglass", "tests", "examples", "README.md", "LICENSE", "CHANGELOG.md", "sqlglass.example.toml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["mssql: needs a live SQL Server named by SQLGLASS_TEST_CONNECTION (skipped otherwise)"]

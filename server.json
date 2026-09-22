@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.S-CurveLabs/sqlglass",
+  "title": "sqlglass",
+  "description": "SQL Server / Azure SQL for agents: real schema, lint, read-only runs, plans, write previews.",
+  "repository": {
+    "url": "https://github.com/S-CurveLabs/sqlglass",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "sqlglass",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "SQLGLASS_CONFIG",
+          "description": "Path to sqlglass.toml (connection definitions). Optional if the file is in the workspace or the user data folder.",
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}

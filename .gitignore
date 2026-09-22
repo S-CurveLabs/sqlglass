@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+dist/
+build/
+# connection definitions are per-machine; commit sqlglass.example.toml instead
+sqlglass.toml
+# external code reviews and our responses are working notes, not part of the package
+CODE_REVIEW.md
+CODE_REVIEW_RESPONSE.md
