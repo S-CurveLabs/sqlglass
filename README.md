@@ -144,4 +144,4 @@ connection and run `set SQLGLASS_TEST_CONNECTION=<name>` then `pytest -m mssql`.
 ## Not built yet
 
 A write mode (by design), reading existing procedure / view definitions from the database, MERGE previews, actual (post-execution) plans and `STATISTICS IO`,
-Postgres/MySQL engines, SQL embedded in Power Query (`Value.NativeQuery`) — the bridge to [letin](https://github.com/S-CurveLabs/letin).
+Postgres/MySQL engines, SQL embedded in Power Query (`Value.NativeQuery`).
